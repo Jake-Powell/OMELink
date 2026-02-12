@@ -7,7 +7,10 @@
 
 <!-- badges: end -->
 
-The goal of OMElink is to …
+**OMELink** is an R package designed for individual-level record
+linkage, implementing a hybrid matching framework that combines exact,
+partial, and fuzzy matching approaches to identify the most probable
+record pairs.
 
 ## Installation
 
@@ -15,6 +18,10 @@ You can install the development version of OMElink from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("Jake-Powell/OMElink")
+# install.packages("remotes")
+remotes::install_github("Jake-Powell/OMELink")
 ```
+
+For examples of how to use the package see the [Matching Names to a Name
+Database
+vignette](https://jake-powell.github.io/OMELink/articles/Matching_names_to_a_name_database.html).
