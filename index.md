@@ -1,13 +1,13 @@
-# OMEManage
+# OMELink
 
-The goal of OMEManage is to …
+The goal of OMElink is to …
 
 ## Installation
 
-You can install the development version of OMEManage from
+You can install the development version of OMElink from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
-pak::pak("Jake-Powell/OMEManage")
+pak::pak("Jake-Powell/OMElink")
 ```
