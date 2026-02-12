@@ -19,6 +19,7 @@ match_people_to_data(
   to_match_LN_column = LN_column,
   to_match_group_column = group_column,
   include_non_matched = FALSE,
+  verbose = T,
   ...
 )
 }
@@ -50,6 +51,8 @@ match_people_to_data(
 \item{to_match_group_column}{Column name in `to_match` that specifies the group (if applicable). Used only when `group_column` is also specified.}
 
 \item{include_non_matched}{Logical; if `TRUE`, includes rows from `to_match` even if no match is found (default: `FALSE`).}
+
+\item{verbose}{Logical; if `TRUE`, include console messaging.}
 
 \item{...}{Additional arguments passed to `clean_name()` or internal matching functions.}
 }

@@ -258,8 +258,7 @@ match_person_to_grouped_data <- function(FN, LN, data,
 #' @param to_match_LN_column Column name for last names in the `to_match` data frame (default: same as `LN_column`).
 #' @param to_match_group_column Column name in `to_match` that specifies the group (if applicable). Used only when `group_column` is also specified.
 #' @param include_non_matched Logical; if `TRUE`, includes rows from `to_match` even if no match is found (default: `FALSE`).
-#' #' @param verbose Logical; if `TRUE`, include console messaging.
-
+#' @param verbose Logical; if `TRUE`, include console messaging.
 #' @param ... Additional arguments passed to `clean_name()` or internal matching functions.
 #'
 #' @return A data frame of matched people. Includes input first and last names as `inputFN` and `inputLN`.
@@ -283,12 +282,12 @@ match_people_to_data <- function(to_match, data,
                                          verbose = T,
                                          ...) {
 
-  if(verbose) lapply = pbapply::pblapply
+  if(verbose) requireNamespace("pbapply", quietly = TRUE) ; lapply = pbapply::pblapply
 
   check = lapply(1:nrow(to_match), function(index){
     d = to_match[index,]
     FN = d[[to_match_FN_column]] ; LN = d[[to_match_LN_column]]
-    out = OMEManage::match_person_to_grouped_data(FN =FN,
+    out = OMELink::match_person_to_grouped_data(FN =FN,
                                                   LN = LN,
                                                   data = data,
                                                   FN_column = FN_column,
