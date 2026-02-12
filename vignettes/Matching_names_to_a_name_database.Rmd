@@ -16,7 +16,7 @@ requireNamespace("DT", quietly = TRUE)
 ```
 
 ```{r setup}
-library(OMEManage)
+library(OMELink)
 ```
 
 **In this document we will provide a run through of how to match names to a name database and perform some checks.** 

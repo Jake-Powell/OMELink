@@ -13,18 +13,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-# OMEManage
+# OMELink
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of OMEManage is to ...
+The goal of OMElink is to ...
 
 ## Installation
 
-You can install the development version of OMEManage from [GitHub](https://github.com/) with:
+You can install the development version of OMElink from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
-pak::pak("Jake-Powell/OMEManage")
+pak::pak("Jake-Powell/OMElink")
 ```
