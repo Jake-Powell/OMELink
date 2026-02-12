@@ -46,7 +46,7 @@ match_people_to_data(
 
 \item{to_match_FN_column}{Column name for first names in the `to_match` data frame (default: same as `FN_column`).}
 
-\item{to_match_LN_column}{Column name for last names in the `to_match` data frame (default: same as `LN_column`).}
+\item{to_match_LN_column}{Column name for last names in `to_match` (default: same as `LN_column`).}
 
 \item{to_match_group_column}{Column name in `to_match` that specifies the group (if applicable). Used only when `group_column` is also specified.}
 
@@ -64,4 +64,52 @@ A data frame of matched people. Includes input first and last names as `inputFN`
 Matches a set of individuals (first and last names in a data frame) to a target dataset,
 optionally within groupings such as teams, departments, or expeditions. This is a batch
 version of `match_person_to_grouped_data()`.
+}
+\examples{
+## ---- Basic matching ----
+
+to_match <- data.frame(
+  FN = c("Karl", "Janet"),
+  LN = c("Linnaeus", "Brown"),
+  stringsAsFactors = FALSE
+)
+
+botanist_db <- data.frame(
+  UPI = c("CL001", "JB002", "AH003", "AA004", "JB003", "GB004"),
+  FN = c("Carl---Karl", "Joseph", "Alexander---Alex", "Agnes", "Janet", "George"),
+  LN = c("Linnaeus---Linnaeus",
+   "Banks",
+    "von Humboldt---von Humboldt",
+     "Arber",
+      "Browne",
+       "Bentham"),
+  Expedition = c("Sweden", "Endeavour", "South America", "UK", "UK", "Australia"),
+  stringsAsFactors = FALSE
+)
+
+result <- match_people_to_data(
+  to_match = to_match,
+  data = botanist_db
+)
+
+result
+
+## ---- Grouped matching ----
+
+to_match_grouped <- data.frame(
+  FN = c("Janet", "Alexander"),
+  LN = c("Brown", "von Humboldt"),
+  Expedition = c("UK", "South America"),
+  stringsAsFactors = FALSE
+)
+
+grouped_result <- match_people_to_data(
+  to_match = to_match_grouped,
+  data = botanist_db,
+  group_column = "Expedition",
+  to_match_group_column = "Expedition"
+)
+
+grouped_result
+
 }

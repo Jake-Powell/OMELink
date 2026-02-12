@@ -255,7 +255,7 @@ match_person_to_grouped_data <- function(FN, LN, data,
 #' @param method Method used for computing string distance. Passed to `stringdist::stringdist()` (default: `"osa"`).
 #' @param show_all_fuzzy Logical; if `TRUE`, shows all fuzzy matches instead of just the best (default: `FALSE`).
 #' @param to_match_FN_column Column name for first names in the `to_match` data frame (default: same as `FN_column`).
-#' @param to_match_LN_column Column name for last names in the `to_match` data frame (default: same as `LN_column`).
+#' @param to_match_LN_column Column name for last names in `to_match` (default: same as `LN_column`).
 #' @param to_match_group_column Column name in `to_match` that specifies the group (if applicable). Used only when `group_column` is also specified.
 #' @param include_non_matched Logical; if `TRUE`, includes rows from `to_match` even if no match is found (default: `FALSE`).
 #' @param verbose Logical; if `TRUE`, include console messaging.
@@ -264,7 +264,53 @@ match_person_to_grouped_data <- function(FN, LN, data,
 #' @return A data frame of matched people. Includes input first and last names as `inputFN` and `inputLN`.
 #'         If `include_non_matched = TRUE`, rows with no match will still be returned (likely with NAs).
 #'
-
+#' @examples
+#' ## ---- Basic matching ----
+#'
+#' to_match <- data.frame(
+#'   FN = c("Karl", "Janet"),
+#'   LN = c("Linnaeus", "Brown"),
+#'   stringsAsFactors = FALSE
+#' )
+#'
+#' botanist_db <- data.frame(
+#'   UPI = c("CL001", "JB002", "AH003", "AA004", "JB003", "GB004"),
+#'   FN = c("Carl---Karl", "Joseph", "Alexander---Alex", "Agnes", "Janet", "George"),
+#'   LN = c("Linnaeus---Linnaeus",
+#'    "Banks",
+#'     "von Humboldt---von Humboldt",
+#'      "Arber",
+#'       "Browne",
+#'        "Bentham"),
+#'   Expedition = c("Sweden", "Endeavour", "South America", "UK", "UK", "Australia"),
+#'   stringsAsFactors = FALSE
+#' )
+#'
+#' result <- match_people_to_data(
+#'   to_match = to_match,
+#'   data = botanist_db
+#' )
+#'
+#' result
+#'
+#' ## ---- Grouped matching ----
+#'
+#' to_match_grouped <- data.frame(
+#'   FN = c("Janet", "Alexander"),
+#'   LN = c("Brown", "von Humboldt"),
+#'   Expedition = c("UK", "South America"),
+#'   stringsAsFactors = FALSE
+#' )
+#'
+#' grouped_result <- match_people_to_data(
+#'   to_match = to_match_grouped,
+#'   data = botanist_db,
+#'   group_column = "Expedition",
+#'   to_match_group_column = "Expedition"
+#' )
+#'
+#' grouped_result
+#'
 #' @export
 match_people_to_data <- function(to_match, data,
                                          FN_column = 'FN',
