@@ -84,8 +84,8 @@ match_people_to_data(
 
 - to_match_LN_column:
 
-  Column name for last names in the \`to_match\` data frame (default:
-  same as \`LN_column\`).
+  Column name for last names in \`to_match\` (default: same as
+  \`LN_column\`).
 
 - to_match_group_column:
 
@@ -111,3 +111,62 @@ match_people_to_data(
 A data frame of matched people. Includes input first and last names as
 \`inputFN\` and \`inputLN\`. If \`include_non_matched = TRUE\`, rows
 with no match will still be returned (likely with NAs).
+
+## Examples
+
+``` r
+## ---- Basic matching ----
+
+to_match <- data.frame(
+  FN = c("Karl", "Janet"),
+  LN = c("Linnaeus", "Brown"),
+  stringsAsFactors = FALSE
+)
+
+botanist_db <- data.frame(
+  UPI = c("CL001", "JB002", "AH003", "AA004", "JB003", "GB004"),
+  FN = c("Carl---Karl", "Joseph", "Alexander---Alex", "Agnes", "Janet", "George"),
+  LN = c("Linnaeus---Linnaeus",
+   "Banks",
+    "von Humboldt---von Humboldt",
+     "Arber",
+      "Browne",
+       "Bentham"),
+  Expedition = c("Sweden", "Endeavour", "South America", "UK", "UK", "Australia"),
+  stringsAsFactors = FALSE
+)
+
+result <- match_people_to_data(
+  to_match = to_match,
+  data = botanist_db
+)
+
+result
+#>        FN       LN  Method NameDB_UPI NameDB_FN NameDB_LN NameDB_Expedition
+#> 1.1  Karl Linnaeus   EXACT      CL001      karl  linnaeus            Sweden
+#> 5   Janet    Brown FN only      JB003     janet    browne                UK
+
+## ---- Grouped matching ----
+
+to_match_grouped <- data.frame(
+  FN = c("Janet", "Alexander"),
+  LN = c("Brown", "von Humboldt"),
+  Expedition = c("UK", "South America"),
+  stringsAsFactors = FALSE
+)
+
+grouped_result <- match_people_to_data(
+  to_match = to_match_grouped,
+  data = botanist_db,
+  group_column = "Expedition",
+  to_match_group_column = "Expedition"
+)
+
+grouped_result
+#>          FN           LN    Expedition  Method NameDB_UPI NameDB_FN
+#> 5     Janet        Brown            UK FN only      JB003     janet
+#> 3 Alexander von Humboldt South America   EXACT      AH003 alexander
+#>      NameDB_LN NameDB_Expedition
+#> 5       browne                UK
+#> 3 von humboldt     South America
+```

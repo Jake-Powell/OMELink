@@ -117,7 +117,7 @@ version of `match_person_to_grouped_data()`.</p>
 
 
 <dt id="arg-to-match-ln-column">to_match_LN_column<a class="anchor" aria-label="anchor" href="#arg-to-match-ln-column"></a></dt>
-<dd><p>Column name for last names in the `to_match` data frame (default: same as `LN_column`).</p></dd>
+<dd><p>Column name for last names in `to_match` (default: same as `LN_column`).</p></dd>
 
 
 <dt id="arg-to-match-group-column">to_match_group_column<a class="anchor" aria-label="anchor" href="#arg-to-match-group-column"></a></dt>
@@ -142,6 +142,65 @@ version of `match_person_to_grouped_data()`.</p>
         If `include_non_matched = TRUE`, rows with no match will still be returned (likely with NAs).</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## ---- Basic matching ----</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">to_match</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  FN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Karl"</span>, <span class="st">"Janet"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  LN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Linnaeus"</span>, <span class="st">"Brown"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">botanist_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  UPI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CL001"</span>, <span class="st">"JB002"</span>, <span class="st">"AH003"</span>, <span class="st">"AA004"</span>, <span class="st">"JB003"</span>, <span class="st">"GB004"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  FN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Carl---Karl"</span>, <span class="st">"Joseph"</span>, <span class="st">"Alexander---Alex"</span>, <span class="st">"Agnes"</span>, <span class="st">"Janet"</span>, <span class="st">"George"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  LN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Linnaeus---Linnaeus"</span>,</span></span>
+<span class="r-in"><span>   <span class="st">"Banks"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"von Humboldt---von Humboldt"</span>,</span></span>
+<span class="r-in"><span>     <span class="st">"Arber"</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"Browne"</span>,</span></span>
+<span class="r-in"><span>       <span class="st">"Bentham"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Expedition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sweden"</span>, <span class="st">"Endeavour"</span>, <span class="st">"South America"</span>, <span class="st">"UK"</span>, <span class="st">"UK"</span>, <span class="st">"Australia"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">match_people_to_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  to_match <span class="op">=</span> <span class="va">to_match</span>,</span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">botanist_db</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">result</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        FN       LN  Method NameDB_UPI NameDB_FN NameDB_LN NameDB_Expedition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1.1  Karl Linnaeus   EXACT      CL001      karl  linnaeus            Sweden</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   Janet    Brown FN only      JB003     janet    browne                UK</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ---- Grouped matching ----</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">to_match_grouped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  FN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Janet"</span>, <span class="st">"Alexander"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  LN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Brown"</span>, <span class="st">"von Humboldt"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Expedition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"UK"</span>, <span class="st">"South America"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">grouped_result</span> <span class="op">&lt;-</span> <span class="fu">match_people_to_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  to_match <span class="op">=</span> <span class="va">to_match_grouped</span>,</span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">botanist_db</span>,</span></span>
+<span class="r-in"><span>  group_column <span class="op">=</span> <span class="st">"Expedition"</span>,</span></span>
+<span class="r-in"><span>  to_match_group_column <span class="op">=</span> <span class="st">"Expedition"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">grouped_result</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          FN           LN    Expedition  Method NameDB_UPI NameDB_FN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     Janet        Brown            UK FN only      JB003     janet</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Alexander von Humboldt South America   EXACT      AH003 alexander</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      NameDB_LN NameDB_Expedition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       browne                UK</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 von humboldt     South America</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
