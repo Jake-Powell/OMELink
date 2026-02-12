@@ -105,17 +105,46 @@ exact, swapped, or fuzzy matching techniques.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with the following components:</p><dl><dt>UPI</dt>
-<dd><p>The matched UPI(s), or `NA` if no match.</p></dd>
+    <p>A list with components:</p><dl><dt>UPI</dt>
+<dd><p>The matched UPI(s), or `NA` if no match is found.</p></dd>
 
   <dt>people</dt>
-<dd><p>The matched row(s) from `data`.</p></dd>
+<dd><p>The matched row(s) from `data`. If no match is found, a single row of `NA`s is returned.</p></dd>
 
   <dt>message</dt>
-<dd><p>A character string describing the match type (e.g., `"EXACT"`, `"FUZZY MATCH"`).</p></dd>
+<dd><p>Character string describing the match type.</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="matching-hierarchy">Matching hierarchy<a class="anchor" aria-label="anchor" href="#matching-hierarchy"></a></h2>
+
+
+<p>Matching is performed in the following order:</p><ol><li><p>Exact match on first and last name</p></li>
+<li><p>Exact match with names swapped</p></li>
+<li><p>Unique single-field exact match</p></li>
+<li><p>Fuzzy match on both fields</p></li>
+<li><p>Fuzzy match on either field</p></li>
+</ol><p>The first successful match type in this hierarchy is returned.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="match-message-values">Match message values<a class="anchor" aria-label="anchor" href="#match-message-values"></a></h2>
+
+
+<p>The returned list contains a `message` element describing the match result.
+Possible values are:</p>
+<p><strong>Exact matches</strong></p><ul><li><p><code>"EXACT"</code> – Exact match on first and last name.</p></li>
+<li><p><code>"EXACT (Swap)"</code> – Exact match with first and last names swapped.</p></li>
+</ul><p><strong>Single-field exact matches</strong></p><ul><li><p><code>"FN only"</code> – Unique exact match on first name only.</p></li>
+<li><p><code>"LN only"</code> – Unique exact match on last name only.</p></li>
+<li><p><code>"FN only (Swap)"</code> – Unique exact match using swapped first name.</p></li>
+<li><p><code>"LN only (Swap)"</code> – Unique exact match using swapped last name.</p></li>
+</ul><p><strong>Fuzzy matches (within `max_dist`)</strong></p><ul><li><p><code>"FUZZY MATCH (best both FN &amp; LN)"</code> – Best fuzzy match where both names are within tolerance.</p></li>
+<li><p><code>"FUZZY MATCHES (both FN &amp; LN)"</code> – All fuzzy matches where both names are within tolerance (`show_all_fuzzy = TRUE`).</p></li>
+<li><p><code>"FUZZY PARTIAL MATCH (best FN or LN)"</code> – Best fuzzy match where only one name is within tolerance.</p></li>
+<li><p><code>"FUZZY PARTIAL MATCHES (FN or LN)"</code> – All partial fuzzy matches (`show_all_fuzzy = TRUE`).</p></li>
+</ul><p><strong>No match</strong></p><ul><li><p><code>"No match"</code> – No exact or fuzzy match found.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -134,32 +163,6 @@ exact, swapped, or fuzzy matching techniques.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $people</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     FN    LN   UPI</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 jose banks JB002</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EXACT"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Name with extra spaces</span></span></span>
-<span class="r-in"><span><span class="fu">match_person_to_data</span><span class="op">(</span><span class="st">"Jane"</span>, <span class="st">"Coldstream"</span>, <span class="va">botanists</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "JC005"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $people</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         FN         LN   UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   jane   coldstream JC005</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "LN only"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Lowercase input, accented name in data</span></span></span>
-<span class="r-in"><span><span class="fu">match_person_to_data</span><span class="op">(</span><span class="st">"carl"</span>, <span class="st">"linnaeus"</span>, <span class="va">botanists</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CL001"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $people</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FN       LN   UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 carl linnaeus CL001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EXACT"</span>
@@ -190,29 +193,6 @@ exact, swapped, or fuzzy matching techniques.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "No match"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Data with different column names</span></span></span>
-<span class="r-in"><span><span class="va">botanists2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  FN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Carl"</span>, <span class="st">"José"</span>, <span class="st">"Alexander"</span>, <span class="st">"Agnes"</span>, <span class="st">"  Jane  "</span>, <span class="st">"Jake"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  Surname <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Linnæus"</span>, <span class="st">"Banks"</span>, <span class="st">"Humboldt"</span>, <span class="st">"Arber"</span>, <span class="st">"Coldstream"</span>, <span class="st">"Banks"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  UPI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CL001"</span>, <span class="st">"JB002"</span>, <span class="st">"AH003"</span>, <span class="st">"AA004"</span>, <span class="st">"JC005"</span>, <span class="st">"CL002"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Last name only, with multiple entries</span></span></span>
-<span class="r-in"><span><span class="fu">match_person_to_data</span><span class="op">(</span><span class="st">"John"</span>, <span class="st">"Banks"</span>, <span class="va">botanists2</span>,</span></span>
-<span class="r-in"><span>                     FN_column <span class="op">=</span> <span class="st">"FN"</span>, LN_column <span class="op">=</span> <span class="st">"Surname"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "JB002"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $people</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FN Surname   UPI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 jose   banks JB002</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $message</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "FUZZY MATCH (best both FN &amp; LN)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

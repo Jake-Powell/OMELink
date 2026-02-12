@@ -72,20 +72,75 @@ match_person_to_data(
 
 ## Value
 
-A list with the following components:
+A list with components:
 
 - UPI:
 
-  The matched UPI(s), or \`NA\` if no match.
+  The matched UPI(s), or \`NA\` if no match is found.
 
 - people:
 
-  The matched row(s) from \`data\`.
+  The matched row(s) from \`data\`. If no match is found, a single row
+  of \`NA\`s is returned.
 
 - message:
 
-  A character string describing the match type (e.g., \`"EXACT"\`,
-  \`"FUZZY MATCH"\`).
+  Character string describing the match type.
+
+## Matching hierarchy
+
+Matching is performed in the following order:
+
+1.  Exact match on first and last name
+
+2.  Exact match with names swapped
+
+3.  Unique single-field exact match
+
+4.  Fuzzy match on both fields
+
+5.  Fuzzy match on either field
+
+The first successful match type in this hierarchy is returned.
+
+## Match message values
+
+The returned list contains a \`message\` element describing the match
+result. Possible values are:
+
+**Exact matches**
+
+- `"EXACT"` – Exact match on first and last name.
+
+- `"EXACT (Swap)"` – Exact match with first and last names swapped.
+
+**Single-field exact matches**
+
+- `"FN only"` – Unique exact match on first name only.
+
+- `"LN only"` – Unique exact match on last name only.
+
+- `"FN only (Swap)"` – Unique exact match using swapped first name.
+
+- `"LN only (Swap)"` – Unique exact match using swapped last name.
+
+**Fuzzy matches (within \`max_dist\`)**
+
+- `"FUZZY MATCH (best both FN & LN)"` – Best fuzzy match where both
+  names are within tolerance.
+
+- `"FUZZY MATCHES (both FN & LN)"` – All fuzzy matches where both names
+  are within tolerance (\`show_all_fuzzy = TRUE\`).
+
+- `"FUZZY PARTIAL MATCH (best FN or LN)"` – Best fuzzy match where only
+  one name is within tolerance.
+
+- `"FUZZY PARTIAL MATCHES (FN or LN)"` – All partial fuzzy matches
+  (\`show_all_fuzzy = TRUE\`).
+
+**No match**
+
+- `"No match"` – No exact or fuzzy match found.
 
 ## Examples
 
@@ -105,32 +160,6 @@ match_person_to_data("Jose", "Banks", botanists)
 #> $people
 #>     FN    LN   UPI
 #> 2 jose banks JB002
-#> 
-#> $message
-#> [1] "EXACT"
-#> 
-
-# Name with extra spaces
-match_person_to_data("Jane", "Coldstream", botanists)
-#> $UPI
-#> [1] "JC005"
-#> 
-#> $people
-#>         FN         LN   UPI
-#> 5   jane   coldstream JC005
-#> 
-#> $message
-#> [1] "LN only"
-#> 
-
-# Lowercase input, accented name in data
-match_person_to_data("carl", "linnaeus", botanists)
-#> $UPI
-#> [1] "CL001"
-#> 
-#> $people
-#>     FN       LN   UPI
-#> 1 carl linnaeus CL001
 #> 
 #> $message
 #> [1] "EXACT"
@@ -161,27 +190,4 @@ match_person_to_data("Greg", "Mendel", botanists)
 #> $message
 #> [1] "No match"
 #> 
-
-# Data with different column names
-botanists2 <- data.frame(
-  FN = c("Carl", "José", "Alexander", "Agnes", "  Jane  ", "Jake"),
-  Surname = c("Linnæus", "Banks", "Humboldt", "Arber", "Coldstream", "Banks"),
-  UPI = c("CL001", "JB002", "AH003", "AA004", "JC005", "CL002"),
-  stringsAsFactors = FALSE
-)
-
-# Last name only, with multiple entries
-match_person_to_data("John", "Banks", botanists2,
-                     FN_column = "FN", LN_column = "Surname")
-#> $UPI
-#> [1] "JB002"
-#> 
-#> $people
-#>     FN Surname   UPI
-#> 2 jose   banks JB002
-#> 
-#> $message
-#> [1] "FUZZY MATCH (best both FN & LN)"
-#> 
-
 ```
