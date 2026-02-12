@@ -39,17 +39,63 @@ match_person_to_data(
 \item{...}{Additional parameters passed to [clean_name()] for name normalization.}
 }
 \value{
-A list with the following components:
+A list with components:
 \describe{
-  \item{UPI}{The matched UPI(s), or `NA` if no match.}
-  \item{people}{The matched row(s) from `data`.}
-  \item{message}{A character string describing the match type (e.g., `"EXACT"`, `"FUZZY MATCH"`).}
+  \item{UPI}{The matched UPI(s), or `NA` if no match is found.}
+  \item{people}{The matched row(s) from `data`. If no match is found, a single row of `NA`s is returned.}
+  \item{message}{Character string describing the match type.}
 }
 }
 \description{
 Attempts to match a person's first and last name to a row in a dataset using
 exact, swapped, or fuzzy matching techniques.
 }
+\section{Matching hierarchy}{
+
+Matching is performed in the following order:
+\enumerate{
+  \item Exact match on first and last name
+  \item Exact match with names swapped
+  \item Unique single-field exact match
+  \item Fuzzy match on both fields
+  \item Fuzzy match on either field
+}
+The first successful match type in this hierarchy is returned.
+}
+
+\section{Match message values}{
+
+The returned list contains a `message` element describing the match result.
+Possible values are:
+
+\strong{Exact matches}
+\itemize{
+  \item \code{"EXACT"} – Exact match on first and last name.
+  \item \code{"EXACT (Swap)"} – Exact match with first and last names swapped.
+}
+
+\strong{Single-field exact matches}
+\itemize{
+  \item \code{"FN only"} – Unique exact match on first name only.
+  \item \code{"LN only"} – Unique exact match on last name only.
+  \item \code{"FN only (Swap)"} – Unique exact match using swapped first name.
+  \item \code{"LN only (Swap)"} – Unique exact match using swapped last name.
+}
+
+\strong{Fuzzy matches (within `max_dist`)}
+\itemize{
+  \item \code{"FUZZY MATCH (best both FN & LN)"} – Best fuzzy match where both names are within tolerance.
+  \item \code{"FUZZY MATCHES (both FN & LN)"} – All fuzzy matches where both names are within tolerance (`show_all_fuzzy = TRUE`).
+  \item \code{"FUZZY PARTIAL MATCH (best FN or LN)"} – Best fuzzy match where only one name is within tolerance.
+  \item \code{"FUZZY PARTIAL MATCHES (FN or LN)"} – All partial fuzzy matches (`show_all_fuzzy = TRUE`).
+}
+
+\strong{No match}
+\itemize{
+  \item \code{"No match"} – No exact or fuzzy match found.
+}
+}
+
 \examples{
 botanists <- data.frame(
   FN = c("Carl", "José", "Alexander", "Agnes", "  Jane  "),
@@ -61,29 +107,10 @@ botanists <- data.frame(
 # Exact match (accent-insensitive)
 match_person_to_data("Jose", "Banks", botanists)
 
-# Name with extra spaces
-match_person_to_data("Jane", "Coldstream", botanists)
-
-# Lowercase input, accented name in data
-match_person_to_data("carl", "linnaeus", botanists)
-
 # Swapped names
 match_person_to_data("Linnæus", "Carl", botanists)
 
 # No match
 match_person_to_data("Greg", "Mendel", botanists)
-
-# Data with different column names
-botanists2 <- data.frame(
-  FN = c("Carl", "José", "Alexander", "Agnes", "  Jane  ", "Jake"),
-  Surname = c("Linnæus", "Banks", "Humboldt", "Arber", "Coldstream", "Banks"),
-  UPI = c("CL001", "JB002", "AH003", "AA004", "JC005", "CL002"),
-  stringsAsFactors = FALSE
-)
-
-# Last name only, with multiple entries
-match_person_to_data("John", "Banks", botanists2,
-                     FN_column = "FN", LN_column = "Surname")
-
 
 }
