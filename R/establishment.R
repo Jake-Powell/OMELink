@@ -31,7 +31,8 @@
 #' @export
 get_weights_basic <- function(tokens){
   low <- c("school","academy","college","sixth","form",
-           "primary","secondary","high","the","of","and")
+           "primary","secondary","high","the","of","and",
+           "centre", "catholic")
 
   w <- rep(1, length(tokens))
   w[tokens %in% low] <- 0.1
@@ -83,7 +84,9 @@ clean_school_name <- function(x, rm_whit = FALSE) {
   x <- stringr::str_squish(x)
 
   # Special cases which occur commonly
-  x <- x |> stringr::str_replace_all(' maths | math ', ' mathematics ')
+  x <- x |>
+    stringr::str_replace_all(' maths | math ', ' mathematics ') |>
+    stringr::str_replace_all(' abbey gate ', ' abbeygate ')
 
   if (rm_whit) {
     x <- stringr::str_remove_all(x, "\\s+")
@@ -92,94 +95,38 @@ clean_school_name <- function(x, rm_whit = FALSE) {
   x
 }
 
-
 #' Link School Names to an Establishment List
 #'
 #' Matches school names from an input dataset to a reference establishment
 #' list using a combination of exact and token-based matching methods.
 #'
 #' @param data Data frame containing school names to be matched.
-#' @param establishment_list Data frame of known establishments. Must contain
-#' columns \code{EstablishmentName} and the specified \code{ID_column}.
-#' @param school_name_column Character string. Name of the column in \code{data}
-#' containing school names.
-#' @param ID_column Character string. Name of the column in
-#' \code{establishment_list} containing the establishment identifier.
-#' Default is \code{"EstablishmentID"}.
-#' @param token_match Character string specifying the token matching method.
-#' One of \code{"exact"}, \code{"partial"}, or \code{"fuzzy"}.
-#' @param get_token_weights Function that takes a character vector of tokens
-#' and returns a numeric vector of weights of the same length. Defaults to
-#' equal weighting for all tokens.
+#' @param establishment_list Data frame of known establishments.
+#' Must contain \code{EstablishmentName} and \code{ID_column}.
+#' @param school_name_column Character string. Column in \code{data}.
+#' @param ID_column Character string. ID column in establishment list.
+#' @param token_method One of \code{"exact"}, \code{"partial"}, \code{"fuzzy"}.
+#' @param fuzzy_threshold Numeric in [0,1] for fuzzy similarity cutoff.
+#' @param get_token_weights Function returning weights per token.
+#' @param keep_top_n Integer. Number of matches stored in \code{top_n_matches}.
+#' @param min_score Numeric. Minimum score required to accept a match.
 #'
-#' @return A data frame with the following columns:
-#' \itemize{
-#'   \item \code{match_index} Index of the matched establishment in
-#'   \code{establishment_list}. Set to \code{NA} when multiple matches exist,
-#'   and \code{-1} when no valid school name is provided.
-#'   \item \code{original_name} Original input school name.
-#'   \item \code{match_name} Matched establishment name(s) formatted as
-#'   \code{"ID: Name"}. Multiple matches are separated by newline characters.
-#'   \item \code{establishment_ID} Matched establishment ID when a single match
-#'   exists, otherwise \code{NA}.
-#'   \item \code{match_method} Method used for matching
-#'   (e.g. \code{"exact"}, \code{"token_exact"}, \code{"token_partial"},
-#'   \code{"token_fuzzy"}, or \code{"NO SCHOOL NAME PROVIDED"}).
-#'   \item \code{match_score} Matching score (token-based methods only; exact
-#'   matches are assigned \code{Inf}).
-#'   \item \code{n_matches} Number of matched establishments.
-#' }
-#'
-#' @details
-#' The matching process proceeds in stages:
-#' \itemize{
-#'   \item School names are cleaned using \code{\link{clean_school_name}}.
-#'   \item Missing or empty names are flagged and not matched.
-#'   \item Exact matching is attempted first on cleaned names.
-#'   \item Remaining records are matched using token-based methods.
-#' }
-#'
-#' Token matching compares words (tokens) in the input name against those in
-#' establishment names. Matching can be:
-#' \itemize{
-#'   \item Exact token matching
-#'   \item Partial matching using \code{stringr::str_detect()}
-#'   \item Fuzzy matching using \code{stringdist::stringdist()}
-#' }
-#'
-#' Token weights can be customised via \code{get_token_weights}, allowing
-#' common or uninformative words (e.g. "school", "academy") to be downweighted.
-#'
-#' When multiple establishments achieve the same best score, all are returned
-#' in \code{match_name}, and \code{establishment_ID} is set to \code{NA}.
-#'
-#' @examples
-#' df <- data.frame(School = c("St Inga's Primary School", "Ilex aquifolium Centre", NA))
-#'
-#' establishments <- data.frame(
-#'   EstablishmentName = c("St. Inga's Primary School",
-#'    "Ilex aquifolium Academy",
-#'    "The DS Maths School"),
-#'   EstablishmentID = c(A, 1, 'I')
-#' )
-#'
-#' link_establishment(
-#'   data = df,
-#'   establishment_list = establishments,
-#'   school_name_column = "School"
-#' )
+#' @return Data frame with match results and diagnostics.
 #'
 #' @export
 link_establishment <- function(data,
                                establishment_list,
                                school_name_column,
                                ID_column = "EstablishmentID",
-                               token_match = "exact",
-                               get_token_weights = function(tokens) rep(1, length(tokens))
+                               token_method = "fuzzy",
+                               fuzzy_threshold = 0.5,
+                               get_token_weights = OMELink::get_weights_basic,
+                               keep_top_n = 3,
+                               min_score = 0.5
 ) {
 
-  token_match <- match.arg(token_match,
-                           choices = c("exact", "partial", "fuzzy"))
+  token_method <- match.arg(token_method,
+                            choices = c("exact", "partial", "fuzzy"))
 
   n <- nrow(data)
 
@@ -192,7 +139,6 @@ link_establishment <- function(data,
 
   est_ids <- establishment_list[[ID_column]]
 
-
   # INITIALISE
   result <- data.frame(
     match_index  = rep(NA_integer_, n),
@@ -202,42 +148,35 @@ link_establishment <- function(data,
     match_method = rep(NA_character_, n),
     match_score  = rep(NA_real_, n),
     n_matches    = rep(NA_integer_, n),
+    top_n_matches = rep(NA_character_, n),
     stringsAsFactors = FALSE
   )
 
-
-  # STEP -1: INVALID
+  # INVALID
   invalid <- is.na(school_name) | school_name == ""
-
   result$match_method[invalid] <- "NO SCHOOL NAME PROVIDED"
   result$match_index[invalid] <- -1
 
   to_match <- which(!invalid)
 
-
-  # STEP 0: EXACT
+  # EXACT MATCH
   exact_idx <- match(school_name[to_match], est_names)
-
   exact_rows <- to_match[!is.na(exact_idx)]
 
   result$match_index[exact_rows]  <- exact_idx[!is.na(exact_idx)]
-  result$match_method[exact_rows] <- "exact"
+  result$match_method[exact_rows] <- "EXACT"
   result$match_score[exact_rows]  <- Inf
   result$n_matches[exact_rows]    <- 1L
-
   result$establishment_ID[exact_rows] <- est_ids[exact_idx[!is.na(exact_idx)]]
 
   result$match_name[exact_rows] <- paste0(
-    result$establishment_ID[exact_rows],
-    ": ",
+    result$establishment_ID[exact_rows], ": ",
     establishment_list$EstablishmentName[exact_idx[!is.na(exact_idx)]]
   )
 
-
-  # Remaining
+  # REMAINING
   to_match <- which(is.na(result$match_index))
   if (length(to_match) == 0) return(result)
-
 
   # TOKENISE
   school_tokens <- school_name[to_match] |>
@@ -246,64 +185,80 @@ link_establishment <- function(data,
   est_tokens <- est_names |>
     stringr::str_split("\\s+", simplify = FALSE)
 
-
   # MATCH FUNCTION
   token_match_fun <- function(tokens_input, tokens_est) {
 
-    if (token_match == "exact") {
-      tokens_input %in% tokens_est
+    if (token_method == "exact") {
+      as.numeric(tokens_input %in% tokens_est)
 
-    } else if (token_match == "partial") {
+    } else if (token_method == "partial") {
       sapply(tokens_input, function(tok){
-        any(stringr::str_detect(tokens_est, tok))
+        as.numeric(any(stringr::str_detect(tokens_est, tok)))
       })
 
-    } else if (token_match == "fuzzy") {
+    } else if (token_method == "fuzzy") {
       sapply(tokens_input, function(tok){
-        any(stringdist::stringdist(tok, tokens_est) <= 1)
+        sims <- 1 - stringdist::stringdist(tok, tokens_est, method = "jw")
+        sims[sims < fuzzy_threshold] <- 0
+        max(sims, na.rm = TRUE)
       })
     }
   }
 
-
   # SCORE
   score_one <- function(tokens_input) {
-
     weights <- get_token_weights(tokens_input)
 
     sapply(est_tokens, function(tokens_est){
-      matches <- token_match_fun(tokens_input, tokens_est)
-      sum(weights[matches])
+      sim <- token_match_fun(tokens_input, tokens_est)
+      sum(weights * sim)
     })
   }
 
-
   match_matrix <- do.call(rbind, lapply(school_tokens, score_one))
-
-
-  # BEST MATCH
-  best_matches_list <- lapply(seq_len(nrow(match_matrix)), function(i){
-    row_scores <- match_matrix[i, ]
-    max_score <- max(row_scores, na.rm = TRUE)
-    list(idx = which(row_scores == max_score), score = max_score)
-  })
-
 
   # FILL
   for (j in seq_along(to_match)) {
 
     row_idx <- to_match[j]
+    row_scores <- match_matrix[j, ]
 
-    match_ids <- best_matches_list[[j]]$idx
-    score     <- best_matches_list[[j]]$score
+    max_score <- max(row_scores, na.rm = TRUE)
+
+    # --- TOP N (always computed for diagnostics)
+    ord <- order(row_scores, decreasing = TRUE, na.last = NA)
+    top_ids <- ord[seq_len(min(keep_top_n, length(ord)))]
+
+    top_labels <- paste0(
+      est_ids[top_ids], ": ",
+      establishment_list$EstablishmentName[top_ids],
+      " = ",
+      round(row_scores[top_ids], 3)
+    )
+
+    result$top_n_matches[row_idx] <- paste(top_labels, collapse = "\n")
+
+    # --- MIN SCORE CHECK
+    if (max_score < min_score) {
+      result$match_method[row_idx] <- "NO GOOD MATCH"
+      result$match_index[row_idx] <- -1
+      result$match_score[row_idx] <- max_score
+      result$n_matches[row_idx] <- 0
+      next
+    }
+
+    # --- STANDARD MATCH (unchanged)
+    match_ids <- which(row_scores == max_score)
 
     matched_ids   <- est_ids[match_ids]
     matched_names <- establishment_list$EstablishmentName[match_ids]
 
-    matched_labels <- paste0(matched_ids, ": ", matched_names)
+    result$match_name[row_idx] <- paste(
+      paste0(matched_ids, ": ", matched_names),
+      collapse = "\n"
+    )
 
-    result$match_name[row_idx] <- paste(matched_labels, collapse = "\n")
-    result$match_score[row_idx] <- score
+    result$match_score[row_idx] <- max_score
     result$n_matches[row_idx] <- length(match_ids)
 
     if (length(match_ids) == 1) {
@@ -314,12 +269,8 @@ link_establishment <- function(data,
       result$establishment_ID[row_idx] <- NA
     }
 
-    result$match_method[row_idx] <- paste0("TOKEN (", token_match, ')')
+    result$match_method[row_idx] <- paste0("TOKEN (", token_method, ")")
   }
-
 
   return(result)
 }
-
-
-

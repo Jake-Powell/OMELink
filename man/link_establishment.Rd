@@ -9,90 +9,37 @@ link_establishment(
   establishment_list,
   school_name_column,
   ID_column = "EstablishmentID",
-  token_match = "exact",
-  get_token_weights = function(tokens) rep(1, length(tokens))
+  token_method = "fuzzy",
+  fuzzy_threshold = 0.5,
+  get_token_weights = OMELink::get_weights_basic,
+  keep_top_n = 3,
+  min_score = 0.5
 )
 }
 \arguments{
 \item{data}{Data frame containing school names to be matched.}
 
-\item{establishment_list}{Data frame of known establishments. Must contain
-columns \code{EstablishmentName} and the specified \code{ID_column}.}
+\item{establishment_list}{Data frame of known establishments.
+Must contain \code{EstablishmentName} and \code{ID_column}.}
 
-\item{school_name_column}{Character string. Name of the column in \code{data}
-containing school names.}
+\item{school_name_column}{Character string. Column in \code{data}.}
 
-\item{ID_column}{Character string. Name of the column in
-\code{establishment_list} containing the establishment identifier.
-Default is \code{"EstablishmentID"}.}
+\item{ID_column}{Character string. ID column in establishment list.}
 
-\item{token_match}{Character string specifying the token matching method.
-One of \code{"exact"}, \code{"partial"}, or \code{"fuzzy"}.}
+\item{token_method}{One of \code{"exact"}, \code{"partial"}, \code{"fuzzy"}.}
 
-\item{get_token_weights}{Function that takes a character vector of tokens
-and returns a numeric vector of weights of the same length. Defaults to
-equal weighting for all tokens.}
+\item{fuzzy_threshold}{Numeric in [0,1] for fuzzy similarity cutoff.}
+
+\item{get_token_weights}{Function returning weights per token.}
+
+\item{keep_top_n}{Integer. Number of matches stored in \code{top_n_matches}.}
+
+\item{min_score}{Numeric. Minimum score required to accept a match.}
 }
 \value{
-A data frame with the following columns:
-\itemize{
-  \item \code{match_index} Index of the matched establishment in
-  \code{establishment_list}. Set to \code{NA} when multiple matches exist,
-  and \code{-1} when no valid school name is provided.
-  \item \code{original_name} Original input school name.
-  \item \code{match_name} Matched establishment name(s) formatted as
-  \code{"ID: Name"}. Multiple matches are separated by newline characters.
-  \item \code{establishment_ID} Matched establishment ID when a single match
-  exists, otherwise \code{NA}.
-  \item \code{match_method} Method used for matching
-  (e.g. \code{"exact"}, \code{"token_exact"}, \code{"token_partial"},
-  \code{"token_fuzzy"}, or \code{"NO SCHOOL NAME PROVIDED"}).
-  \item \code{match_score} Matching score (token-based methods only; exact
-  matches are assigned \code{Inf}).
-  \item \code{n_matches} Number of matched establishments.
-}
+Data frame with match results and diagnostics.
 }
 \description{
 Matches school names from an input dataset to a reference establishment
 list using a combination of exact and token-based matching methods.
-}
-\details{
-The matching process proceeds in stages:
-\itemize{
-  \item School names are cleaned using \code{\link{clean_school_name}}.
-  \item Missing or empty names are flagged and not matched.
-  \item Exact matching is attempted first on cleaned names.
-  \item Remaining records are matched using token-based methods.
-}
-
-Token matching compares words (tokens) in the input name against those in
-establishment names. Matching can be:
-\itemize{
-  \item Exact token matching
-  \item Partial matching using \code{stringr::str_detect()}
-  \item Fuzzy matching using \code{stringdist::stringdist()}
-}
-
-Token weights can be customised via \code{get_token_weights}, allowing
-common or uninformative words (e.g. "school", "academy") to be downweighted.
-
-When multiple establishments achieve the same best score, all are returned
-in \code{match_name}, and \code{establishment_ID} is set to \code{NA}.
-}
-\examples{
-df <- data.frame(School = c("St Inga's Primary School", "Ilex aquifolium Centre", NA))
-
-establishments <- data.frame(
-  EstablishmentName = c("St. Inga's Primary School",
-   "Ilex aquifolium Academy",
-   "The DS Maths School"),
-  EstablishmentID = c(A, 1, 'I')
-)
-
-link_establishment(
-  data = df,
-  establishment_list = establishments,
-  school_name_column = "School"
-)
-
 }
