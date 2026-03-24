@@ -50,8 +50,11 @@ list using a combination of exact and token-based matching methods.</p>
 <span>  <span class="va">establishment_list</span>,</span>
 <span>  <span class="va">school_name_column</span>,</span>
 <span>  ID_column <span class="op">=</span> <span class="st">"EstablishmentID"</span>,</span>
-<span>  token_match <span class="op">=</span> <span class="st">"exact"</span>,</span>
-<span>  get_token_weights <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span><span class="op">)</span></span>
+<span>  token_method <span class="op">=</span> <span class="st">"fuzzy"</span>,</span>
+<span>  fuzzy_threshold <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  get_token_weights <span class="op">=</span> <span class="fu">OMELink</span><span class="fu">::</span><span class="va"><a href="get_weights_basic.html">get_weights_basic</a></span>,</span>
+<span>  keep_top_n <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  min_score <span class="op">=</span> <span class="fl">0.5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -64,86 +67,43 @@ list using a combination of exact and token-based matching methods.</p>
 
 
 <dt id="arg-establishment-list">establishment_list<a class="anchor" aria-label="anchor" href="#arg-establishment-list"></a></dt>
-<dd><p>Data frame of known establishments. Must contain
-columns <code>EstablishmentName</code> and the specified <code>ID_column</code>.</p></dd>
+<dd><p>Data frame of known establishments.
+Must contain <code>EstablishmentName</code> and <code>ID_column</code>.</p></dd>
 
 
 <dt id="arg-school-name-column">school_name_column<a class="anchor" aria-label="anchor" href="#arg-school-name-column"></a></dt>
-<dd><p>Character string. Name of the column in <code>data</code>
-containing school names.</p></dd>
+<dd><p>Character string. Column in <code>data</code>.</p></dd>
 
 
 <dt id="arg-id-column">ID_column<a class="anchor" aria-label="anchor" href="#arg-id-column"></a></dt>
-<dd><p>Character string. Name of the column in
-<code>establishment_list</code> containing the establishment identifier.
-Default is <code>"EstablishmentID"</code>.</p></dd>
+<dd><p>Character string. ID column in establishment list.</p></dd>
 
 
-<dt id="arg-token-match">token_match<a class="anchor" aria-label="anchor" href="#arg-token-match"></a></dt>
-<dd><p>Character string specifying the token matching method.
-One of <code>"exact"</code>, <code>"partial"</code>, or <code>"fuzzy"</code>.</p></dd>
+<dt id="arg-token-method">token_method<a class="anchor" aria-label="anchor" href="#arg-token-method"></a></dt>
+<dd><p>One of <code>"exact"</code>, <code>"partial"</code>, <code>"fuzzy"</code>.</p></dd>
+
+
+<dt id="arg-fuzzy-threshold">fuzzy_threshold<a class="anchor" aria-label="anchor" href="#arg-fuzzy-threshold"></a></dt>
+<dd><p>Numeric in [0,1] for fuzzy similarity cutoff.</p></dd>
 
 
 <dt id="arg-get-token-weights">get_token_weights<a class="anchor" aria-label="anchor" href="#arg-get-token-weights"></a></dt>
-<dd><p>Function that takes a character vector of tokens
-and returns a numeric vector of weights of the same length. Defaults to
-equal weighting for all tokens.</p></dd>
+<dd><p>Function returning weights per token.</p></dd>
+
+
+<dt id="arg-keep-top-n">keep_top_n<a class="anchor" aria-label="anchor" href="#arg-keep-top-n"></a></dt>
+<dd><p>Integer. Number of matches stored in <code>top_n_matches</code>.</p></dd>
+
+
+<dt id="arg-min-score">min_score<a class="anchor" aria-label="anchor" href="#arg-min-score"></a></dt>
+<dd><p>Numeric. Minimum score required to accept a match.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with the following columns:</p><ul><li><p><code>match_index</code> Index of the matched establishment in
-  <code>establishment_list</code>. Set to <code>NA</code> when multiple matches exist,
-  and <code>-1</code> when no valid school name is provided.</p></li>
-<li><p><code>original_name</code> Original input school name.</p></li>
-<li><p><code>match_name</code> Matched establishment name(s) formatted as
-  <code>"ID: Name"</code>. Multiple matches are separated by newline characters.</p></li>
-<li><p><code>establishment_ID</code> Matched establishment ID when a single match
-  exists, otherwise <code>NA</code>.</p></li>
-<li><p><code>match_method</code> Method used for matching
-  (e.g. <code>"exact"</code>, <code>"token_exact"</code>, <code>"token_partial"</code>,
-  <code>"token_fuzzy"</code>, or <code>"NO SCHOOL NAME PROVIDED"</code>).</p></li>
-<li><p><code>match_score</code> Matching score (token-based methods only; exact
-  matches are assigned <code>Inf</code>).</p></li>
-<li><p><code>n_matches</code> Number of matched establishments.</p></li>
-</ul></div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The matching process proceeds in stages:</p><ul><li><p>School names are cleaned using <code><a href="clean_school_name.html">clean_school_name</a></code>.</p></li>
-<li><p>Missing or empty names are flagged and not matched.</p></li>
-<li><p>Exact matching is attempted first on cleaned names.</p></li>
-<li><p>Remaining records are matched using token-based methods.</p></li>
-</ul><p>Token matching compares words (tokens) in the input name against those in
-establishment names. Matching can be:</p><ul><li><p>Exact token matching</p></li>
-<li><p>Partial matching using <code><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">stringr::str_detect()</a></code></p></li>
-<li><p>Fuzzy matching using <code><a href="https://rdrr.io/pkg/stringdist/man/stringdist.html" class="external-link">stringdist::stringdist()</a></code></p></li>
-</ul><p>Token weights can be customised via <code>get_token_weights</code>, allowing
-common or uninformative words (e.g. "school", "academy") to be downweighted.</p>
-<p>When multiple establishments achieve the same best score, all are returned
-in <code>match_name</code>, and <code>establishment_ID</code> is set to <code>NA</code>.</p>
+    <p>Data frame with match results and diagnostics.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>School <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"St Inga's Primary School"</span>, <span class="st">"Ilex aquifolium Centre"</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">establishments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  EstablishmentName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"St. Inga's Primary School"</span>,</span></span>
-<span class="r-in"><span>   <span class="st">"Ilex aquifolium Academy"</span>,</span></span>
-<span class="r-in"><span>   <span class="st">"The DS Maths School"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  EstablishmentID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">A</span>, <span class="fl">1</span>, <span class="st">'I'</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'A' not found</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">link_establishment</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">df</span>,</span></span>
-<span class="r-in"><span>  establishment_list <span class="op">=</span> <span class="va">establishments</span>,</span></span>
-<span class="r-in"><span>  school_name_column <span class="op">=</span> <span class="st">"School"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'establishments' not found</span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
