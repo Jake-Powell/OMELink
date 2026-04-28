@@ -7,7 +7,7 @@ single FN/LN pair. Other columns are repeated accordingly.
 ## Usage
 
 ``` r
-expand_name_variants(data, FN_column, LN_column, sep = "---")
+expand_name_variants(data, FN_column, LN_column, sep = "---", verbose = F)
 ```
 
 ## Arguments
@@ -29,6 +29,10 @@ expand_name_variants(data, FN_column, LN_column, sep = "---")
   A string delimiter used to separate multiple names in a single cell
   (default is \`'—'\`).
 
+- verbose:
+
+  Logical; whether to print progress messages.
+
 ## Value
 
 A data frame where each row corresponds to a single combination of FN
@@ -47,12 +51,12 @@ botanists <- data.frame(
 
 expand_name_variants(botanists, FN_column = "FNs", LN_column = "LNs")
 #>           FNs        LNs   UPI
+#> 2        José      Banks JB002
+#> 4       Agnes      Arber AA004
+#> 5      Jane   Coldstream JC005
 #> 1        Carl    Linnaus CL001
 #> 1.1      Karl    Linnaus CL001
-#> 2        José      Banks JB002
 #> 3   Alexander   Humboldt AH003
 #> 3.1      Alex   Humboldt AH003
 #> 3.2      Alex  Humbouldt AH003
-#> 4       Agnes      Arber AA004
-#> 5      Jane   Coldstream JC005
 ```

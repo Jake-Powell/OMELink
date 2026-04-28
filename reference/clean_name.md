@@ -5,7 +5,7 @@ Clean names
 ## Usage
 
 ``` r
-clean_name(x, rm_whit = F)
+clean_name(x)
 ```
 
 ## Arguments
@@ -13,11 +13,6 @@ clean_name(x, rm_whit = F)
 - x:
 
   name to clean
-
-- rm_whit:
-
-  Flag (TRUE/FALSE) for whether whitespace wants to be removed from the
-  names
 
 ## Value
 
@@ -35,5 +30,5 @@ rm_whit = T.
  clean_name('John Leonard Knapp')
 #> [1] "john leonard knapp"
  clean_name('Pierre-Joseph Redouté')
-#> [1] "pierre-joseph redoute"
+#> [1] "pierre joseph redoute"
 ```

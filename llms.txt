@@ -25,22 +25,52 @@ vignette](https://jake-powell.github.io/OMELink/articles/Matching_names_to_a_nam
 
 - [`check_ID()`](https://jake-powell.github.io/OMELink/reference/check_ID.md)
   : Check ID Column Format and Establishment Number Consistency
+- [`classify_match_decision()`](https://jake-powell.github.io/OMELink/reference/classify_match_decision.md)
+  : Classify Match Decision and Review Requirement
 - [`clean_name()`](https://jake-powell.github.io/OMELink/reference/clean_name.md)
   : Clean names
 - [`clean_school_name()`](https://jake-powell.github.io/OMELink/reference/clean_school_name.md)
   : Clean and Standardise School Names for Matching
+- [`collapse_to_best_per_upi()`](https://jake-powell.github.io/OMELink/reference/collapse_to_best_per_upi.md)
+  : Collapse Multiple Candidate Rows to Best Row per Identifier
+- [`derive_match_method()`](https://jake-powell.github.io/OMELink/reference/derive_match_method.md)
+  : Derive Human-Readable Match Method Labels
+- [`escape_regex()`](https://jake-powell.github.io/OMELink/reference/escape_regex.md)
+  : Escape regular expression special characters
 - [`expand_name_variants()`](https://jake-powell.github.io/OMELink/reference/expand_name_variants.md)
   : Expand Rows by Name Variants
+- [`format_top_matches()`](https://jake-powell.github.io/OMELink/reference/format_top_matches.md)
+  : Format Top Candidate Matches for Manual Review
 - [`get_weights_basic()`](https://jake-powell.github.io/OMELink/reference/get_weights_basic.md)
   : Basic Token Weighting Function for School Name Matching
 - [`link_establishment()`](https://jake-powell.github.io/OMELink/reference/link_establishment.md)
   : Link School Names to an Establishment List
 - [`match_people_to_data()`](https://jake-powell.github.io/OMELink/reference/match_people_to_data.md)
   : Match Multiple People to Grouped Data
+- [`match_people_to_data2()`](https://jake-powell.github.io/OMELink/reference/match_people_to_data2.md)
+  : Match Multiple People to a Reference Data Set
 - [`match_person_to_data()`](https://jake-powell.github.io/OMELink/reference/match_person_to_data.md)
   : Match a Person's Name to a Data Frame of Individuals
+- [`match_person_to_data2()`](https://jake-powell.github.io/OMELink/reference/match_person_to_data2.md)
+  : Match a Person to a Candidate Data Set Using Exact, Partial, and
+  Fuzzy Matching
 - [`match_person_to_grouped_data()`](https://jake-powell.github.io/OMELink/reference/match_person_to_grouped_data.md)
   : Match a Person to Grouped Data
+- [`match_person_to_grouped_data2()`](https://jake-powell.github.io/OMELink/reference/match_person_to_grouped_data2.md)
+  : Match a Person to Grouped Data Using Exact, Partial, and Fuzzy
+  Matching
+- [`matching_breakdown()`](https://jake-powell.github.io/OMELink/reference/matching_breakdown.md)
+  : Build First-Name and Last-Name Matching Breakdown
+- [`name_similarity_jw()`](https://jake-powell.github.io/OMELink/reference/name_similarity_jw.md)
+  : Compute Token-Based Jaro-Winkler Name Similarity
+- [`partial_fuzzy_match()`](https://jake-powell.github.io/OMELink/reference/partial_fuzzy_match.md)
+  : Compute Partial and Fuzzy Matching Signals for a Single Name
+- [`rank_name_matches()`](https://jake-powell.github.io/OMELink/reference/rank_name_matches.md)
+  : Rank Candidate Name Matches
+- [`score_name_matches()`](https://jake-powell.github.io/OMELink/reference/score_name_matches.md)
+  : Score Combined First-Name and Last-Name Matches
+- [`standardise_match_people()`](https://jake-powell.github.io/OMELink/reference/standardise_match_people.md)
+  : Standardise matched people output
 
 # Articles
 

@@ -48,7 +48,7 @@ Other columns are repeated accordingly.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_name_variants</span><span class="op">(</span><span class="va">data</span>, <span class="va">FN_column</span>, <span class="va">LN_column</span>, sep <span class="op">=</span> <span class="st">"---"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_name_variants</span><span class="op">(</span><span class="va">data</span>, <span class="va">FN_column</span>, <span class="va">LN_column</span>, sep <span class="op">=</span> <span class="st">"---"</span>, verbose <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,6 +70,10 @@ Other columns are repeated accordingly.</p>
 <dt id="arg-sep">sep<a class="anchor" aria-label="anchor" href="#arg-sep"></a></dt>
 <dd><p>A string delimiter used to separate multiple names in a single cell (default is `'—'`).</p></dd>
 
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; whether to print progress messages.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -88,14 +92,14 @@ Other columns are repeated accordingly.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expand_name_variants</span><span class="op">(</span><span class="va">botanists</span>, FN_column <span class="op">=</span> <span class="st">"FNs"</span>, LN_column <span class="op">=</span> <span class="st">"LNs"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           FNs        LNs   UPI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        José      Banks JB002</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       Agnes      Arber AA004</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      Jane   Coldstream JC005</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        Carl    Linnaus CL001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1.1      Karl    Linnaus CL001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        José      Banks JB002</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3   Alexander   Humboldt AH003</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3.1      Alex   Humboldt AH003</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3.2      Alex  Humbouldt AH003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       Agnes      Arber AA004</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      Jane   Coldstream JC005</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
