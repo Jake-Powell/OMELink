@@ -4,12 +4,10 @@
 \alias{clean_name}
 \title{Clean names}
 \usage{
-clean_name(x, rm_whit = F)
+clean_name(x)
 }
 \arguments{
 \item{x}{name to clean}
-
-\item{rm_whit}{Flag (TRUE/FALSE) for whether whitespace wants to be removed from the names}
 }
 \value{
 cleaned name

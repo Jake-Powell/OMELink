@@ -14,6 +14,7 @@ Imports:
     stringi,
     stringr
 Suggests: 
+    cli,
     DT,
     knitr,
     pbapply,

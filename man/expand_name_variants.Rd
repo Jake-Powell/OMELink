@@ -4,7 +4,7 @@
 \alias{expand_name_variants}
 \title{Expand Rows by Name Variants}
 \usage{
-expand_name_variants(data, FN_column, LN_column, sep = "---")
+expand_name_variants(data, FN_column, LN_column, sep = "---", verbose = F)
 }
 \arguments{
 \item{data}{A data frame containing at least the FN, LN, and UPI columns.}
@@ -14,6 +14,8 @@ expand_name_variants(data, FN_column, LN_column, sep = "---")
 \item{LN_column}{A string indicating the name of the last name/s column.}
 
 \item{sep}{A string delimiter used to separate multiple names in a single cell (default is `'---'`).}
+
+\item{verbose}{Logical; whether to print progress messages.}
 }
 \value{
 A data frame where each row corresponds to a single combination of FN and LN variant,
